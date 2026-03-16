@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Élèves - IMTECH-Educ</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-graduation-cap"></i> IMTECH-Educ</h1>
+                <p>Administration</p>
+            </div>
+
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">Gestion</div>
+                    <a href="eleves.html" class="menu-item active">
+                        <i class="fas fa-user-graduate"></i>
+                        <span>Élèves</span>
+                    </a>
+                  
+                   
+                    <a href="inscriptions.html" class="menu-item">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>Inscriptions</span>
+                    </a>
+                   
+                </div>
+
+                
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-details">
+                        <h4  id="userRole">Administrateur</h4>
+                        
+                    </divç>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <i class="fas fa-user-graduate"></i>
+                    <h2>Gestion des Élèves</h2>
+                </div>
+                <div class="top-bar-actions">
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <!-- Statistiques -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="totalEleves">0</h3>
+                            <p>Total Élèves</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="elevesActifs">0</h3>
+                            <p>Élèves Actifs</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-pause-circle"></i>
+                        </div>
+                        <div class="stat-details">
+                            <h3 id="elevesInactifs">0</h3>
+                            <p>Élèves Inactifs</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Toolbar -->
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Rechercher un élève...">
+                    </div>
+                    <button id="searchButton" class="btn btn-primary">Rechercher</button>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-success" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> Nouvel Élève
+                        </button>
+                        <button class="btn btn-primary" onclick="exportElevesCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table des élèves -->
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Numéro</th>
+                                <th>Matricule</th>
+                                <th>Nom & Prénom</th>
+                                <th>Date de Naissance</th>
+                                <th>Contact Parents</th>
+                                <th>Statut</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="elevesTableBody">
+                            <tr>
+                                <td colspan="7" class="text-center">
+                                    <div class="loading"></div> Chargement des données...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="paginationContainer"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Ajout/Modification Élève -->
+    <div id="eleveModal" class="modal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 id="modalTitle">
+                    <i class="fas fa-user-plus"></i> Nouvel Élève
+                </h3>
+                <button class="modal-close" onclick="closeModal('eleveModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="eleveForm">
+                    <input type="hidden" id="eleveId" name="id">
+
+                    <!-- Informations Personnelles -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-user"></i> Informations Personnelles
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="matricule"><i class="fas fa-id-card"></i> Matricule *</label>
+                                <input type="text" id="matricule" name="matricule" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="codeunique"><i class="fas fa-barcode"></i> Code Unique</label>
+                                <input type="text" id="codeunique" name="codeunique">
+                            </div>
+                            <div class="form-group">
+                                <label for="nom"><i class="fas fa-user"></i> Nom *</label>
+                                <input type="text" id="nom" name="nom" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prenom"><i class="fas fa-user"></i> Prénom *</label>
+                                <input type="text" id="prenom" name="prenom" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dateNaissance"><i class="fas fa-birthday-cake"></i> Date de Naissance</label>
+                                <input type="date" id="dateNaissance" name="dateNaissance">
+                            </div>
+                            <div class="form-group">
+                                <label for="lieuNaissance"><i class="fas fa-map-marker-alt"></i> Lieu de Naissance</label>
+                                <input type="text" id="lieuNaissance" name="lieuNaissance">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="adresse"><i class="fas fa-home"></i> Adresse</label>
+                                <input type="text" id="adresse" name="adresse">
+                            </div>
+                            <div class="form-group">
+                                <label for="urlPhoto"><i class="fas fa-image"></i> URL Photo</label>
+                                <input type="text" id="urlPhoto" name="urlPhoto">
+                            </div>
+                            <div class="form-group">
+                                <label for="eglise"><i class="fas fa-church"></i> Église</label>
+                                <input type="text" id="eglise" name="eglise">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations du Père -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-male"></i> Informations du Père
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="pere"><i class="fas fa-user"></i> Nom du Père</label>
+                                <input type="text" id="pere" name="pere">
+                            </div>
+                            <div class="form-group">
+                                <label for="professionPere"><i class="fas fa-briefcase"></i> Profession</label>
+                                <input type="text" id="professionPere" name="professionPere">
+                            </div>
+                            <div class="form-group">
+                                <label for="lieuTravailPere"><i class="fas fa-building"></i> Lieu de Travail</label>
+                                <input type="text" id="lieuTravailPere" name="lieuTravailPere">
+                            </div>
+                            <div class="form-group">
+                                <label for="telPere"><i class="fas fa-phone"></i> Téléphone</label>
+                                <input type="tel" id="telPere" name="telPere">
+                            </div>
+                            <div class="form-group">
+                                <label for="finonaPere"><i class="fas fa-map-pin"></i> Finona Père</label>
+                                <input type="text" id="finonaPere" name="finonaPere">
+                            </div>
+                            <div class="form-group">
+                                <label for="devoirePere"><i class="fas fa-tasks"></i> Devoir Père</label>
+                                <input type="text" id="devoirePere" name="devoirePere">
+                            </div>
+                            <div class="form-group">
+                                <label for="fikambananaPere"><i class="fas fa-users"></i> Fikambana Père</label>
+                                <input type="text" id="fikambananaPere" name="fikambananaPere">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations de la Mère -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-female"></i> Informations de la Mère
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="mere"><i class="fas fa-user"></i> Nom de la Mère</label>
+                                <input type="text" id="mere" name="mere">
+                            </div>
+                            <div class="form-group">
+                                <label for="professionMere"><i class="fas fa-briefcase"></i> Profession</label>
+                                <input type="text" id="professionMere" name="professionMere">
+                            </div>
+                            <div class="form-group">
+                                <label for="lieuTravailMere"><i class="fas fa-building"></i> Lieu de Travail</label>
+                                <input type="text" id="lieuTravailMere" name="lieuTravailMere">
+                            </div>
+                            <div class="form-group">
+                                <label for="telMere"><i class="fas fa-phone"></i> Téléphone</label>
+                                <input type="tel" id="telMere" name="telMere">
+                            </div>
+                            <div class="form-group">
+                                <label for="finonaMere"><i class="fas fa-map-pin"></i> Finona Mère</label>
+                                <input type="text" id="finonaMere" name="finonaMere">
+                            </div>
+                            <div class="form-group">
+                                <label for="devoireMere"><i class="fas fa-tasks"></i> Devoir Mère</label>
+                                <input type="text" id="devoireMere" name="devoireMere">
+                            </div>
+                            <div class="form-group">
+                                <label for="fikambananaMere"><i class="fas fa-users"></i> Fikambana Mère</label>
+                                <input type="text" id="fikambananaMere" name="fikambananaMere">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Parents -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-address-book"></i> Contact Parents & Tuteur
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="adresseParent"><i class="fas fa-home"></i> Adresse Parents</label>
+                                <input type="text" id="adresseParent" name="adresseParent">
+                            </div>
+                            <div class="form-group">
+                                <label for="telephoneParent"><i class="fas fa-phone"></i> Téléphone Parents</label>
+                                <input type="tel" id="telephoneParent" name="telephoneParent">
+                            </div>
+                            <div class="form-group">
+                                <label for="nomTutaire"><i class="fas fa-user-tie"></i> Nom du Tuteur</label>
+                                <input type="text" id="nomTutaire" name="nomTutaire">
+                            </div>
+                            <div class="form-group">
+                                <label for="adresseTutaire"><i class="fas fa-home"></i> Adresse Tuteur</label>
+                                <input type="text" id="adresseTutaire" name="adresseTutaire">
+                            </div>
+                            <div class="form-group">
+                                <label for="telTutaire"><i class="fas fa-phone"></i> Téléphone Tuteur</label>
+                                <input type="tel" id="telTutaire" name="telTutaire">
+                            </div>
+                            <div class="form-group">
+                                <label for="statusParent"><i class="fas fa-info-circle"></i> Statut Parents</label>
+                                <input type="text" id="statusParent" name="statusParent">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations Religieuses -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-cross"></i> Informations Religieuses
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="dateBapteme"><i class="fas fa-calendar"></i> Date de Baptême</label>
+                                <input type="date" id="dateBapteme" name="dateBapteme">
+                            </div>
+                            <div class="form-group">
+                                <label for="lieuBapteme"><i class="fas fa-map-marker-alt"></i> Lieu de Baptême</label>
+                                <input type="text" id="lieuBapteme" name="lieuBapteme">
+                            </div>
+                            <div class="form-group">
+                                <label for="egliseParent"><i class="fas fa-church"></i> Église Parents</label>
+                                <input type="text" id="egliseParent" name="egliseParent">
+                            </div>
+                            <div class="form-group">
+                                <label for="eglise1"><i class="fas fa-church"></i> Église 1</label>
+                                <input type="text" id="eglise1" name="eglise1">
+                            </div>
+                            <div class="form-group">
+                                <label for="faritra"><i class="fas fa-map"></i> Faritra</label>
+                                <input type="text" id="faritra" name="faritra">
+                            </div>
+                            <div class="form-group">
+                                <label for="apv"><i class="fas fa-map-signs"></i> APV</label>
+                                <input type="text" id="apv" name="apv">
+                            </div>
+                            <div class="form-group">
+                                <label for="finonaZaza"><i class="fas fa-map-pin"></i> Finona Zaza</label>
+                                <input type="text" id="finonaZaza" name="finonaZaza">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Informations Familiales -->
+                    <div class="form-section">
+                        <div class="form-section-title">
+                            <i class="fas fa-home"></i> Informations Familiales & Académiques
+                        </div>
+                        <div class="form-grid-2">
+                            <div class="form-group">
+                                <label for="enfantHabitA"><i class="fas fa-house-user"></i> Enfant Habit À</label>
+                                <input type="text" id="enfantHabitA" name="enfantHabitA">
+                            </div>
+                            <div class="form-group">
+                                <label for="sinonEnfantHabitA"><i class="fas fa-home"></i> Sinon Habit À</label>
+                                <input type="text" id="sinonEnfantHabitA" name="sinonEnfantHabitA">
+                            </div>
+                            <div class="form-group">
+                                <label for="chargeEtude"><i class="fas fa-book-reader"></i> Charge Étude</label>
+                                <input type="text" id="chargeEtude" name="chargeEtude">
+                            </div>
+                            <div class="form-group">
+                                <label for="quiPremierResponsable"><i class="fas fa-user-shield"></i> Premier Responsable</label>
+                                <input type="text" id="quiPremierResponsable" name="quiPremierResponsable">
+                            </div>
+                            <div class="form-group">
+                                <label for="raintampo"><i class="fas fa-sort-numeric-up"></i> Raintampo (Total)</label>
+                                <input type="number" id="raintampo" name="raintampo" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="raintampoLahy"><i class="fas fa-male"></i> Raintampo Lahy</label>
+                                <input type="number" id="raintampoLahy" name="raintampoLahy" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="raintampoVavy"><i class="fas fa-female"></i> Raintampo Vavy</label>
+                                <input type="number" id="raintampoVavy" name="raintampoVavy" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="raintampoFaha"><i class="fas fa-sort-numeric-up"></i> Raintampo Faha</label>
+                                <input type="number" id="raintampoFaha" name="raintampoFaha" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="raintampoEcole"><i class="fas fa-school"></i> Raintampo École</label>
+                                <input type="text" id="raintampoEcole" name="raintampoEcole">
+                            </div>
+                            <div class="form-group">
+                                <label for="oldEcole"><i class="fas fa-school"></i> Ancienne École</label>
+                                <input type="text" id="oldEcole" name="oldEcole">
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="raisonHampidirana"><i class="fas fa-clipboard"></i> Raison Hampidirana</label>
+                                <textarea id="raisonHampidirana" name="raisonHampidirana" rows="2"></textarea>
+                            </div>
+                            <div class="form-group full-width">
+                                <label for="comportementEnfant"><i class="fas fa-user-check"></i> Comportement Enfant</label>
+                                <textarea id="comportementEnfant" name="comportementEnfant" rows="2"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="raison"><i class="fas fa-comment"></i> Raison</label>
+                                <input type="text" id="raison" name="raison">
+                            </div>
+                            <div class="form-group">
+                                <label for="vononaVe"><i class="fas fa-question"></i> Vonona Ve</label>
+                                <input type="text" id="vononaVe" name="vononaVe">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('eleveModal')">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveEleve()">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../configuration/config.js"></script>
+    <script src="../js/admin-utils.js"></script>
+    <script src="../js/eleves.js"></script>
+</body>
+
+</html>

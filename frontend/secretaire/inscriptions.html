@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Inscriptions - IMTECH-Educ</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-graduation-cap"></i> IMTECH-Educ</h1>
+                <p>Administration</p>
+            </div>
+            <nav class="sidebar-menu">
+                <div class="menu-section">
+                    <div class="menu-section-title">Gestion</div>
+                    <a href="eleves.html" class="menu-item">
+                        <i class="fas fa-user-graduate"></i><span>Élèves</span>
+                    </a>
+                    <a href="classes.html" class="menu-item">
+                        <i class="fas fa-chalkboard"></i><span>Classes</span>
+                    </a>
+                    <a href="annees-scolaires.html" class="menu-item">
+                        <i class="fas fa-calendar-alt"></i><span>Années Scolaires</span>
+                    </a>
+                    <a href="inscriptions.html" class="menu-item active">
+                        <i class="fas fa-clipboard-list"></i><span>Inscriptions</span>
+                    </a>
+                    <a href="matieres.html" class="menu-item">
+                        <i class="fas fa-book"></i><span>Matières</span>
+                    </a>
+                    <a href="utilisateurs.html" class="menu-item">
+                        <i class="fas fa-user-cog"></i><span>Utilisateurs</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">Académique</div>
+                    <a href="trimestres.html" class="menu-item">
+                        <i class="fas fa-calendar-week"></i><span>Trimestres</span>
+                    </a>
+                    <a href="examens.html" class="menu-item">
+                        <i class="fas fa-file-alt"></i><span>Examens</span>
+                    </a>
+                    <a href="notes.html" class="menu-item">
+                        <i class="fas fa-star"></i><span>Notes</span>
+                    </a>
+                    <a href="absences.html" class="menu-item">
+                        <i class="fas fa-user-clock"></i><span>Absences</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">Finances</div>
+                    <a href="tarifs.html" class="menu-item">
+                        <i class="fas fa-tag"></i><span>Tarifs</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <h4>Administrateur</h4>
+                        <p id="userRole">ADMIN</p>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <i class="fas fa-clipboard-list"></i>
+                    <h2>Gestion des Inscriptions</h2>
+                </div>
+                <div class="top-bar-actions">
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <div class="content-wrapper">
+                <div class="toolbar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="Rechercher une inscription...">
+                    </div>
+                    <div class="toolbar-actions">
+                        <button class="btn btn-success" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> Nouvelle Inscription
+                        </button>
+                        <button class="btn btn-primary" onclick="exportInscriptionCSV()">
+                            <i class="fas fa-file-csv"></i> Export CSV
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Élève</th>
+                                <th>Classe</th>
+                                <th>Année Scolaire</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="inscriptionsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center">
+                                    <div class="loading"></div> Chargement des données...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="inscriptionsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">
+                    <i class="fas fa-plus"></i> Nouvelle Inscription
+                </h3>
+                <button class="modal-close" onclick="closeModal('inscriptionsModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="inscriptionsForm">
+                    <input type="hidden" id="inscriptionId" name="id">
+
+                    <div class="form-group">
+                        <label for="id_eleve"><i class="fas fa-user-graduate"></i> ID Élève *</label>
+                        <input type="text" id="id_eleve" name="id_eleve" required placeholder="Identifiant de l'élève">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_classe"><i class="fas fa-chalkboard"></i> Classe *</label>
+                        <select id="id_classe" name="id_classe" required>
+                            <option value="">-- Sélectionner une classe --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_annescolaire"><i class="fas fa-calendar-alt"></i> Année Scolaire *</label>
+                        <select id="id_annescolaire" name="id_annescolaire" required>
+                            <option value="">-- Sélectionner une année scolaire --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="type"><i class="fas fa-clipboard-list"></i> Type d'inscription *</label>
+                        <select id="type" name="type" required>
+                            <option value="">-- Sélectionner --</option>
+                            <option value="INSCRIPTION">Inscription</option>
+                            <option value="REINSCRIPTION">Réinscription</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('inscriptionsModal')">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button type="button" class="btn btn-primary" onclick="saveInscription()">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../configuration/config.js"></script>
+    <script src="../js/admin-utils.js"></script>
+    <script src="../js/inscriptions.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Paiements - IMTECH-Educ</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-graduation-cap"></i> IMTECH-Educ</h1>
+                <p>ECONOMAT</p>
+            </div>
+            <nav class="sidebar-menu">
+                
+                <div class="menu-section">
+                    <div class="menu-section-title">Finances</div>
+                     <a href="paiements.html" class="menu-item active"><i class="fas fa-money-bill-wave"></i><span>Paiements</span></a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details"><h4>Administrateur</h4><p>ADMIN</p></div>
+                </div>
+                <button class="btn-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+            </div>
+        </aside>
+        
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <button class="mobile-menu-toggle"><i class="fas fa-bars"></i></button>
+                    <i class="fas fa-money-bill-wave"></i><h2>Gestion des Paiements</h2>
+                </div>
+                <div class="top-bar-actions"><span id="currentDate"></span></div>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-success"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="stat-info"><h3 id="totalPaiements">0</h3><p>Total Paiements</p></div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary"><i class="fas fa-coins"></i></div>
+                    <div class="stat-info"><h3 id="montantTotal">0 Ar</h3><p>Montant Total</p></div>
+                </div>
+            </div>
+            
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Liste des Paiements</h3>
+                    <div class="header-actions">
+                        <input type="text" id="searchInput" placeholder="Rechercher..." class="search-input">
+                        <button class="btn btn-success" onclick="openAddModal()"><i class="fas fa-plus"></i> Nouveau Paiement</button>
+                        <button class="btn btn-secondary" id="exportBtn"><i class="fas fa-download"></i> Exporter</button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Élève</th><th>Classe</th><th>Montant</th><th>Mois</th><th>Date</th><th>Actions</th></tr>
+                        </thead>
+                        <tbody id="paiementsTableBody">
+                            <tr><td colspan="6" class="text-center">Chargement...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <div id="paiementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-plus"></i> Nouveau Paiement</h3>
+                <button class="modal-close" onclick="closeModal('paiementModal')"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="paiementForm" onsubmit="event.preventDefault(); savePaiement();">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Matricule Élève <span class="required">*</span></label>
+                            <input type="text" id="matricule" name="matricule" required 
+                                   placeholder="Entrez le matricule de l'élève">
+                        </div>
+                        <div class="form-group">
+                            <label>Année Scolaire <span class="required">*</span></label>
+                            <select id="anneeScolaireId" name="anneeScolaireId" required 
+                                    class="form-control">
+                                <option value="">Chargement des années scolaires...</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Montant (Ar) <span class="required">*</span></label>
+                            <input type="number" id="amount" name="amount" required 
+                                   placeholder="Montant du paiement">
+                        </div>
+                        <div class="form-group">
+                            <label>Mois</label>
+                            <select id="mois" name="mois" class="form-control">
+                                <option value="">Sélectionner un mois</option>
+                                <option value="Janvier">Janvier</option>
+                                <option value="Février">Février</option>
+                                <option value="Mars">Mars</option>
+                                <option value="Avril">Avril</option>
+                                <option value="Mai">Mai</option>
+                                <option value="Juin">Juin</option>
+                                <option value="Juillet">Juillet</option>
+                                <option value="Août">Août</option>
+                                <option value="Septembre">Septembre</option>
+                                <option value="Octobre">Octobre</option>
+                                <option value="Novembre">Novembre</option>
+                                <option value="Décembre">Décembre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Type de Paiement</label>
+                            <select id="type" name="type" class="form-control">
+                                <option value="INSCRIPTION">Droit d'inscription</option>
+                                <option value="REINSCRIPTION">Droit dr reinscription</option>
+                                <option value="ECOLAGE">Ecolage</option>
+                                
+                            </select>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('paiementModal')"><i class="fas fa-times"></i> Annuler</button>
+                <button class="btn btn-primary" onclick="savePaiement()"><i class="fas fa-save"></i> Enregistrer</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="../configuration/config.js"></script>
+    <script src="../js/paiements.js"></script>
+</body>
+</html>
