@@ -1,11 +1,19 @@
 #!/bin/bash
+
+# 1. Build du backend
+cd ~/IMTECH/CODE/backend/gestionecole
+mvn clean package
+
+# 2. Copier le .jar
+cp target/*.jar ~/IMTECH/CODE/backend/gestionecole.jar
+
+# 3. Aller dans APP_DEV
 cd ~/IMTECH/APP_DEV
 
-# Arrêter le container existant si nécessaire
+# 4. Restart container
 docker stop spring-app-dev || true
 docker rm spring-app-dev || true
 
-# Relancer le backend avec le .jar depuis CODE/backend
 docker run -d \
   --name spring-app-dev \
   -v ~/IMTECH/CODE/backend/gestionecole.jar:/app/gestionecole.jar \
