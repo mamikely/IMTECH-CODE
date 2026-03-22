@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Classes - IMTECH-Educ</title>
+    <link rel="stylesheet" href="../styles.css">
+    <link rel="stylesheet" href="../css/admin.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-graduation-cap"></i> IMTECH-Educ</h1>
+                <p>Administration</p>
+            </div>
+
+             <nav class="sidebar-menu">
+                <div class="menu-section">
+                  
+                    <a href="classes.html" class="menu-item active">
+                        <i class="fas fa-chalkboard"></i><span>Classes</span>
+                    </a>
+                    <a href="annees-scolaires.html" class="menu-item ">
+                        <i class="fas fa-calendar-alt"></i><span>Années Scolaires</span>
+                    </a>
+                    
+                    <a href="matieres.html" class="menu-item">
+                        <i class="fas fa-book"></i><span>Matières</span>
+                    </a>
+                    <a href="utilisateurs.html" class="menu-item">
+                        <i class="fas fa-user-cog"></i><span>Utilisateurs</span>
+                    </a>
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">Académique</div>
+                    <a href="trimestres.html" class="menu-item">
+                        <i class="fas fa-calendar-week"></i><span>Trimestres</span>
+                    </a>
+                   
+                </div>
+                <div class="menu-section">
+                    <div class="menu-section-title">Finances</div>
+                    <a href="tarifs.html" class="menu-item">
+                        <i class="fas fa-tag"></i><span>Tarifs</span>
+                    </a>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <div class="user-avatar"><i class="fas fa-user"></i></div>
+                    <div class="user-details">
+                        <h4 id="userRole">Administrateur</h4>
+                        
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <i class="fas fa-chalkboard"></i>
+                    <h2>Gestion des Classes</h2>
+                </div>
+                <div class="top-bar-actions">
+                    <span id="currentDate"></span>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">
+                        <i class="fas fa-chalkboard"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalClasses">0</h3>
+                        <p>Total Classes</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Bar -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><i class="fas fa-list"></i> Liste des Classes</h3>
+                    <div class="header-actions">
+                        <input type="text" id="searchInput" placeholder="Rechercher..." class="search-input">
+                        <button class="btn btn-success" onclick="openAddModal()">
+                            <i class="fas fa-plus"></i> Nouvelle Classe
+                        </button>
+                        <button class="btn btn-secondary" id="exportBtn">
+                            <i class="fas fa-download"></i> Exporter
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="table-container">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Nom</th>
+                                <th>Niveau</th>
+                                <th>Élèves</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="classesTableBody">
+                            <tr>
+                                <td colspan="4" class="text-center">Chargement...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Classe -->
+    <div id="classeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle"><i class="fas fa-plus"></i> Nouvelle Classe</h3>
+                <button class="modal-close" onclick="closeModal('classeModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="classeForm" onsubmit="event.preventDefault(); saveClasse();">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="nom">Nom de la classe <span class="required">*</span></label>
+                            <input type="text" id="nom" name="nom" required 
+                                   placeholder="Ex: 6ème A, CM2, Terminale S">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="niveau">Niveau</label>
+                            <input type="text" id="niveau" name="niveau" 
+                                   placeholder="Ex: Collège, Primaire, Lycée">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('classeModal')">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+                <button class="btn btn-primary" onclick="saveClasse()">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="../configuration/config.js"></script>
+    <script src="../js/classes.js"></script>
+</body>
+</html>

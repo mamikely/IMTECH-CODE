@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="loginApp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - School Management System</title>
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- AngularJS CDN -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+  <style>
+    /* Custom animations */
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .shake {
+      animation: shake 0.5s;
+    }
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-10px); }
+      40% { transform: translateX(10px); }
+      60% { transform: translateX(-10px); }
+      80% { transform: translateX(10px); }
+      100% { transform: translateX(0); }
+    }
+    .relative {
+      position: relative;
+    }
+    .absolute {
+      position: absolute;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen font-sans">
+<div class="bg-white p-8 rounded-lg shadow-xl w-96" ng-controller="LoginCtrl" ng-class="{'fade-in': true}">
+  <div class="flex justify-center mb-6">
+    <img src="https://via.placeholder.com/150?text=Logo" alt="Logo" class="h-20 w-20 rounded-full">
+  </div>
+  <h2 class="text-2xl font-semibold mb-6 text-center text-indigo-800">Authentification IMTECH</h2>
+  <form name="loginForm" ng-submit="login()" novalidate>
+    <div class="mb-4 relative">
+      <label class="block mb-2 font-medium">Nom d'utilisateur</label>
+      <input ng-model="user.username" name="username" type="text" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <i class="fas fa-user absolute right-3 top-10 text-gray-400"></i>
+      <p ng-if="loginForm.username.$invalid && loginForm.username.$touched" class="text-red-500 text-sm mt-1">Nom d'utilisateur requis</p>
+    </div>
+    <div class="mb-6 relative">
+      <label class="block mb-2 font-medium">Mot de passe</label>
+      <input ng-model="user.password" name="password" type="password" class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <i class="fas fa-lock absolute right-3 top-10 text-gray-400"></i>
+      <p ng-if="loginForm.password.$invalid && loginForm.password.$touched" class="text-red-500 text-sm mt-1">Mot de passe requis</p>
+    </div>
+    <button type="submit" ng-disabled="loginForm.$invalid" class="bg-indigo-500 text-white w-full px-4 py-2 rounded hover:bg-indigo-600 transition">Se connecter</button>
+  </form>
+  <p ng-if="errorMessage" class="text-red-500 text-center mt-4 shake">{{errorMessage}}</p>
+  <p ng-if="successMessage" class="text-green-500 text-center mt-4">{{successMessage}}</p>
+</div>
+
+<script>
+  angular.module('loginApp', ['ngAnimate'])
+          .controller('LoginCtrl', function($scope, $http, $window) {
+            $scope.user = { username: '', password: '' };
+            $scope.errorMessage = '';
+            $scope.successMessage = '';
+
+            $scope.login = function() {
+              if ($scope.loginForm.$invalid) {
+                return;
+              }
+              $http.post('/api/auth/login', $scope.user).then(function(res) {
+                if (res.data.status === 'success') {
+                  $window.localStorage.setItem('Token', res.data.Token);
+                  $window.localStorage.setItem('XTenantID', res.data.XTenantID);
+                  $window.localStorage.setItem('tenants', JSON.stringify(res.data.tenants));
+                  $window.localStorage.setItem('role', res.data.role);
+                  $scope.successMessage = 'Connexion réussie ! Redirection en cours...';
+                 window.location.href='/view/admin.html'
+                  $scope.errorMessage = '';
+                } else {
+                  $scope.errorMessage = res.data.message || 'Erreur de connexion';
+                  $scope.successMessage = '';
+                }
+              }, function(err) {
+                $scope.errorMessage = 'Erreur lors de la connexion';
+                $scope.successMessage = '';
+              });
+            };
+          });
+</script>
+</body>
+</html>

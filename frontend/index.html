@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentification - IMTECH-Educ</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Styles spécifiques à la page de connexion */
+        body {
+            background: linear-gradient(135deg, #4361ee, #3a0ca3);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, #4361ee, #3a0ca3);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .login-header h1 {
+            color: #2b2d42;
+            font-size: 28px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .login-header h1 i {
+            color: #4361ee;
+            font-size: 32px;
+        }
+
+        .login-header p {
+            color: #6c757d;
+            font-size: 15px;
+            margin-top: 12px;
+        }
+
+        .brand-logo {
+            font-size: 32px;
+            color: #4361ee;
+            margin-bottom: 15px;
+        }
+
+        .brand-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #2b2d42;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tagline {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 30px;
+            display: block;
+        }
+
+        /* Styles responsives */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 30px 20px;
+                margin: 15px;
+            }
+
+            .login-header h1 {
+                font-size: 24px;
+            }
+
+            .form-options {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+
+            .forgot-password {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>
+                <i class="fas fa-graduation-cap"></i>
+                <span>IMTECH-Educ</span>
+            </h1>
+            <p>Plateforme de gestion scolaire</p>
+        </div>
+
+        <form id="loginForm" class="login-form">
+            <div id="error-message" class="error-message"></div>
+
+            <div class="form-group">
+                <label for="username">
+                    <i class="fas fa-user-tie"></i> Nom d'utilisateur
+                </label>
+                <div class="input-with-icon">
+                   
+                    <input type="text" id="username" name="username" placeholder="Entrez votre nom d'utilisateur"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">
+                    <i class="fas fa-key"></i> Mot de passe
+                </label>
+                <div class="input-with-icon">
+                    
+                    <input type="password" id="password" name="password" placeholder="Entrez votre mot de passe"
+                        required>
+                    <i class="fas fa-eye toggle-password" id="togglePassword"></i>
+                </div>
+            </div>
+
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember" id="remember">
+                    <span>Se souvenir de moi</span>
+                </label>
+                <a href="#" class="forgot-password">
+                    <i class="fas fa-question-circle"></i>&nbsp; Mot de passe oublié ?
+                </a>
+            </div>
+
+            <button type="submit" class="login-button">
+                <span class="button-text">Se connecter</span>
+                <i class="fas fa-sign-in-alt"></i>
+            </button>
+        </form>
+
+        <div class="login-footer">
+            <p>© 2025 IMTECH-Educ. Tous droits réservés.</p>
+            <p class="version">Version 1.0.0</p>
+        </div>
+    </div>
+    <script src="configuration/config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Gestion du bouton d'affichage/masquage du mot de passe
+        document.getElementById('togglePassword').addEventListener('click', function () {
+            const passwordInput = document.getElementById('password');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye');
+            this.classList.toggle('fa-eye-slash');
+        });
+    </script>
+</body>
+
+</html>

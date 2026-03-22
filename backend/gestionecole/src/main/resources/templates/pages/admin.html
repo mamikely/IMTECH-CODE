@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="schoolApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Management System</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-animate.min.js"></script>
+    <style>
+        /* Custom animations */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        .modal-open {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .modal-closed {
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans" ng-controller="MainCtrl">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="bg-indigo-800 text-white w-64 space-y-6 py-7 px-2 fixed h-full overflow-auto shadow-lg">
+        <div class="flex items-center justify-center mb-8">
+            <img src="https://via.placeholder.com/150?text=Logo" alt="Logo"
+                 class="h-20 w-20 rounded-full border-2 border-white">
+        </div>
+        <nav>
+            <a href="#" ng-click="loadView('anneeScolaire')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-calendar mr-3 text-lg"></i> Année Scolaire
+            </a>
+            <a href="#" ng-click="loadView('classe')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-chalkboard-teacher mr-3 text-lg"></i> Classe
+            </a>
+            <a href="#" ng-click="loadView('matiere')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-book mr-3 text-lg"></i> Matière
+            </a>
+            <a href="#" ng-click="loadView('tarifs')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-money-bill mr-3 text-lg"></i> Tarifs
+            </a>
+            <a href="#" ng-click="loadView('trimestre')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-clock mr-3 text-lg"></i> Trimestre
+            </a>
+            <a href="#" ng-click="loadView('utilisateur')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-users mr-3 text-lg"></i> Utilisateurs
+            </a>
+            <a href="#" ng-click="loadView('tenants')"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center">
+                <i class="fas fa-school mr-3 text-lg"></i> Écoles (Tenants)
+            </a>
+            <a href="#"
+               class="block py-2.5 px-4 rounded transition duration-200 hover:bg-indigo-700 flex items-center mt-8">
+                <i class="fas fa-sign-out-alt mr-3 text-lg"></i> Déconnexion
+            </a>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 p-10 ml-64 overflow-auto">
+        <h1 class="text-4xl font-bold mb-8 text-indigo-800 fade-in">Gestion Scolaire</h1>
+
+        <div ng-if="loading" class="flex justify-center items-center h-64">
+            <div class="spinner"></div>
+            <p class="ml-4 text-lg text-gray-600">Chargement en cours...</p>
+        </div>
+
+        <div ng-if="!loading">
+
+            <!-- AnneeScolaire Section -->
+            <div ng-if="currentView === 'anneeScolaire'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Années Scolaires</h2>
+                <button ng-click="openModal('anneeScolaire', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Année Scolaire</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in anneeScolaires" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.anneeScolaire}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('anneeScolaire', item)"
+                                    class="text-blue-500 mr-2 hover:text-blue-700"><i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('anneeScolaire', item.id)"
+                                    class="text-red-500 hover:text-red-700"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Classe Section -->
+            <div ng-if="currentView === 'classe'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Classes</h2>
+                <button ng-click="openModal('classe', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Nom</th>
+                        <th class="p-3 text-left">Niveau</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in classes" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.nom}}</td>
+                        <td class="p-3 border-t">{{item.niveau}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('classe', item)" class="text-blue-500 mr-2 hover:text-blue-700">
+                                <i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('classe', item.id)" class="text-red-500 hover:text-red-700"><i
+                                    class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Matiere Section -->
+            <div ng-if="currentView === 'matiere'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Matières</h2>
+                <button ng-click="openModal('matiere', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Nom</th>
+                        <th class="p-3 text-left">Coefficient</th>
+                        <th class="p-3 text-left">Description</th>
+                        <th class="p-3 text-left">Classe</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in matieres" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.nom}}</td>
+                        <td class="p-3 border-t">{{item.coefficient}}</td>
+                        <td class="p-3 border-t">{{item.description}}</td>
+                        <td class="p-3 border-t">{{item.classe ? item.classe.nom : ''}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('matiere', item)"
+                                    class="text-blue-500 mr-2 hover:text-blue-700"><i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('matiere', item.id)" class="text-red-500 hover:text-red-700"><i
+                                    class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tarifs Section -->
+            <div ng-if="currentView === 'tarifs'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Tarifs</h2>
+                <button ng-click="openModal('tarifs', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Type</th>
+                        <th class="p-3 text-left">Montant</th>
+                        <th class="p-3 text-left">Classe</th>
+                        <th class="p-3 text-left">Année Scolaire</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in tarifs" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.type}}</td>
+                        <td class="p-3 border-t">{{item.montant}}</td>
+                        <td class="p-3 border-t">{{item.classe ? item.classe.nom : ''}}</td>
+                        <td class="p-3 border-t">{{item.anneeScolaire ? item.anneeScolaire.anneeScolaire : ''}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('tarifs', item)" class="text-blue-500 mr-2 hover:text-blue-700">
+                                <i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('tarifs', item.id)" class="text-red-500 hover:text-red-700"><i
+                                    class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Trimestre Section -->
+            <div ng-if="currentView === 'trimestre'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Trimestres</h2>
+                <button ng-click="openModal('trimestre', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Nom</th>
+                        <th class="p-3 text-left">Année Scolaire</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in trimestres" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.nom}}</td>
+                        <td class="p-3 border-t">{{item.anneeScolaire ? item.anneeScolaire.anneeScolaire : ''}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('trimestre', item)"
+                                    class="text-blue-500 mr-2 hover:text-blue-700"><i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('trimestre', item.id)" class="text-red-500 hover:text-red-700">
+                                <i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Utilisateur Section -->
+            <div ng-if="currentView === 'utilisateur'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Utilisateurs</h2>
+                <button ng-click="openModal('utilisateur', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Enregistrer un Utilisateur
+                </button>
+                <p class="text-lg">Nombre d'utilisateurs: {{userCount}}</p>
+                <!-- No full list, only count and register -->
+            </div>
+
+            <!-- Tenants Section -->
+            <div ng-if="currentView === 'tenants'" class="fade-in bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-800">Gestion des Écoles (Tenants)</h2>
+                <button ng-click="openModal('tenants', {})"
+                        class="bg-green-500 text-white px-4 py-2 rounded mb-4 hover:bg-green-600 transition"><i
+                        class="fas fa-plus mr-2"></i>Ajouter
+                </button>
+                <table class="w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                    <thead class="bg-gray-100">
+                    <tr>
+                        <th class="p-3 text-left">ID</th>
+                        <th class="p-3 text-left">Nom</th>
+                        <th class="p-3 text-left">Adresse</th>
+                        <th class="p-3 text-left">Téléphone</th>
+                        <th class="p-3 text-left">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr ng-repeat="item in tenants" class="hover:bg-gray-50">
+                        <td class="p-3 border-t">{{item.id}}</td>
+                        <td class="p-3 border-t">{{item.nom}}</td>
+                        <td class="p-3 border-t">{{item.adresse}}</td>
+                        <td class="p-3 border-t">{{item.telephone}}</td>
+                        <td class="p-3 border-t">
+                            <button ng-click="openModal('tenants', item)"
+                                    class="text-blue-500 mr-2 hover:text-blue-700"><i class="fas fa-edit"></i></button>
+                            <button ng-click="deleteItem('tenants', item.id)" class="text-red-500 hover:text-red-700"><i
+                                    class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <p class="text-lg mt-4">Nombre d'écoles: {{tenantCount}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Forms -->
+<div ng-if="showModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white p-8 rounded-lg shadow-xl w-1/2 modal"
+         ng-class="{'modal-open': showModal, 'modal-closed': !showModal}">
+        <h3 class="text-2xl font-semibold mb-6 text-gray-800">{{modalTitle}}</h3>
+        <form ng-submit="saveItem(modalType, modalData)">
+            <!-- AnneeScolaire Form -->
+            <div ng-if="modalType === 'anneeScolaire'">
+                <label class="block mb-2 font-medium">Année Scolaire</label>
+                <input ng-model="modalData.anneeScolaire"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <!-- Classe Form -->
+            <div ng-if="modalType === 'classe'">
+                <label class="block mb-2 font-medium">Nom</label>
+                <input ng-model="modalData.nom"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Niveau</label>
+                <input ng-model="modalData.niveau"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <!-- Matiere Form -->
+            <div ng-if="modalType === 'matiere'">
+                <label class="block mb-2 font-medium">Nom</label>
+                <input ng-model="modalData.nom"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Coefficient</label>
+                <input ng-model="modalData.coefficient"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Description</label>
+                <textarea ng-model="modalData.description"
+                          class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea>
+                <label class="block mb-2 font-medium">Classe</label>
+                <select ng-model="modalData.classe.id" ng-options="c.id as c.nom for c in classes"
+                        class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required></select>
+            </div>
+            <!-- Tarifs Form -->
+            <div ng-if="modalType === 'tarifs'">
+                <label class="block mb-2 font-medium">Type</label>
+                <input ng-model="modalData.type"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Montant</label>
+                <input ng-model="modalData.montant" type="number"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Classe</label>
+                <select ng-model="selectedClasseId" ng-options="c.id as c.nom for c in classes"
+                        class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required></select>
+                <label class="block mb-2 font-medium">Année Scolaire</label>
+                <select ng-model="selectedAnneeId" ng-options="a.id as a.anneeScolaire for a in anneeScolaires"
+                        class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required></select>
+            </div>
+            <!-- Trimestre Form -->
+            <div ng-if="modalType === 'trimestre'">
+                <label class="block mb-2 font-medium">Nom</label>
+                <input ng-model="modalData.nom"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Année Scolaire</label>
+                <select ng-model="modalData.anneeScolaire.id"
+                        ng-options="a.id as a.anneeScolaire for a in anneeScolaires"
+                        class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        required></select>
+            </div>
+            <!-- Utilisateur Form (Register) -->
+            <div ng-if="modalType === 'utilisateur'">
+                <label class="block mb-2 font-medium">Username</label>
+                <input ng-model="modalData.username"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Password</label>
+                <input ng-model="modalData.password" type="password"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Role</label>
+                <input ng-model="modalData.role"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+            </div>
+            <!-- Tenants Form -->
+            <div ng-if="modalType === 'tenants'">
+                <label class="block mb-2 font-medium">Nom</label>
+                <input ng-model="modalData.nom"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+                <label class="block mb-2 font-medium">Adresse</label>
+                <input ng-model="modalData.adresse"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <label class="block mb-2 font-medium">Téléphone</label>
+                <input ng-model="modalData.telephone"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <label class="block mb-2 font-medium">Logo URL</label>
+                <input ng-model="modalData.logo"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <label class="block mb-2 font-medium">Slogan</label>
+                <input ng-model="modalData.slogan"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <label class="block mb-2 font-medium">Email</label>
+                <input ng-model="modalData.email"
+                       class="w-full p-3 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <!-- Add other fields if needed -->
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button type="button" ng-click="closeModal()"
+                        class="bg-gray-500 text-white px-4 py-2 rounded mr-2 hover:bg-gray-600 transition">Annuler
+                </button>
+                <button type="submit" class="bg-indigo-500 text-white px-4 py-2 rounded hover:bg-indigo-600 transition">
+                    Sauvegarder
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    angular.module('schoolApp', ['ngAnimate'])
+        .controller('MainCtrl', function ($scope, $http) {
+            $scope.currentView = '';
+            $scope.loading = false;
+            $scope.showModal = false;
+            $scope.modalTitle = '';
+            $scope.modalType = '';
+            $scope.modalData = {};
+            $scope.selectedClasseId = '';
+            $scope.selectedAnneeId = '';
+
+            // Initial test data for testing (can be removed when backend is live)
+            $scope.anneeScolaires = [];
+            $scope.classes = [];
+            $scope.matieres = [];
+            $scope.tarifs = [];
+            $scope.trimestres = [];
+            $scope.userCount = 0;
+            $scope.tenants = [];
+            $scope.tenantCount = 0;
+
+            $scope.loadView = function (view) {
+                $scope.currentView = view;
+                $scope.loading = true;
+                if (view === 'anneeScolaire') {
+                    $http.get('/api/anneescolaire/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.anneeScolaires = res.data.message;
+                        }
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'classe') {
+                    $http.get('/api/classe/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.classes = res.data.message;
+                        }
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'matiere') {
+                    $http.get('/api/matieres').then(function (res) {
+                        $scope.matieres = res.data;
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'tarifs') {
+                    $http.get('/api/tarifs/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.tarifs = res.data.message;
+                        }
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'trimestre') {
+                    $http.get('/api/trimestres').then(function (res) {
+                        $scope.trimestres = res.data;
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'utilisateur') {
+                    $http.get('/api/users/count').then(function (res) {
+                        $scope.userCount = res.data;
+                        $scope.loading = false;
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                } else if (view === 'tenants') {
+                    $http.get('/api/ecole/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.tenants = res.data.message;
+                        }
+                        $http.get('/api/ecole/count').then(function (resCount) {
+                            $scope.tenantCount = resCount.data;
+                            $scope.loading = false;
+                        });
+                    }, function (err) {
+                        console.error(err);
+                        $scope.loading = false;
+                    });
+                }
+            };
+
+            $scope.openModal = function (type, data) {
+                // Load dependencies if needed
+                if ((type === 'matiere' || type === 'tarifs' || type === 'trimestre') && $scope.anneeScolaires.length === 0) {
+                    $http.get('/api/anneescolaire/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.anneeScolaires = res.data.message;
+                        }
+                    });
+                }
+                if ((type === 'matiere' || type === 'tarifs') && $scope.classes.length === 0) {
+                    $http.get('/api/classe/getAll').then(function (res) {
+                        if (res.data.status === 'success') {
+                            $scope.classes = res.data.message;
+                        }
+                    });
+                }
+                $scope.modalType = type;
+                $scope.modalData = angular.copy(data) || {};
+                $scope.selectedClasseId = data.classe ? data.classe.id : '';
+                $scope.selectedAnneeId = data.anneeScolaire ? data.anneeScolaire.id : '';
+                $scope.modalTitle = (data.id ? 'Modifier ' : 'Ajouter ') + type.charAt(0).toUpperCase() + type.slice(1);
+                $scope.showModal = true;
+            };
+
+            $scope.closeModal = function () {
+                $scope.showModal = false;
+            };
+
+            $scope.saveItem = function (type, data) {
+                var method = data.id ? 'put' : 'post';
+                var url = '';
+                if (type === 'anneeScolaire') {
+                    url = data.id ? '/api/anneescolaire/update' : '/api/anneescolaire/save';
+                } else if (type === 'classe') {
+                    url = data.id ? '/api/classe/update' : '/api/classe/save';
+                } else if (type === 'matiere') {
+                    if (data.classe && data.classe.id) {
+                        data.classe = {id: data.classe.id};
+                    }
+                    url = data.id ? '/api/matieres/' + data.id : '/api/matieres';
+                } else if (type === 'tarifs') {
+                    if (data.id) {
+                        url = '/api/tarifs/update';
+                    } else {
+                        url = '/api/tarifs/save/' + $scope.selectedClasseId + '/' + $scope.selectedAnneeId;
+                    }
+                } else if (type === 'trimestre') {
+                    if (data.anneeScolaire && data.anneeScolaire.id) {
+                        data.anneeScolaire = {id: data.anneeScolaire.id};
+                    }
+                    url = data.id ? '/api/trimestres/' + data.id : '/api/trimestres';
+                } else if (type === 'utilisateur') {
+                    url = '/api/users/register';
+                    method = 'post'; // Always post for register
+                } else if (type === 'tenants') {
+                    url = data.id ? '/api/ecole/update' : '/api/ecole/save';
+                }
+
+                $http({
+                    method: method,
+                    url: url,
+                    data: data,
+                    headers:  {
+                        'X-TenantID': localStorage.getItem('XTenantID'),
+                        'Authorization': 'Bearer ' + localStorage.getItem('Token')
+                    }
+                }).then(function (res) {
+                    if (res.data.status === 'success' || res.status === 200 || res.status === 201) {
+                        $scope.loadView(type); // Refresh the view
+                    } else if (res.data.status === 'exist') {
+                        alert(res.data.message);
+                    }
+                    $scope.closeModal();
+                }, function (err) {
+                    console.error(err);
+                    alert('Erreur lors de la sauvegarde');
+                    $scope.closeModal();
+                });
+            };
+
+            $scope.deleteItem = function (type, id) {
+                if (confirm('Confirmer la suppression?')) {
+                    var url = '';
+                    if (type === 'anneeScolaire') {
+                        url = '/api/anneescolaire/delete/' + id;
+                    } else if (type === 'classe') {
+                        url = '/api/classe/delete/' + id;
+                    } else if (type === 'matiere') {
+                        url = '/api/matieres/' + id;
+                    } else if (type === 'tarifs') {
+                        url = '/api/tarifs/delete/' + id;
+                    } else if (type === 'trimestre') {
+                        url = '/api/trimestres/' + id;
+                    } else if (type === 'tenants') {
+                        url = '/api/ecole/delete/' + id;
+                    }
+                    $http.delete(url).then(function (res) {
+                        if (res.data.status === 'success' || res.status === 200) {
+                            $scope.loadView(type);
+                        }
+                    }, function (err) {
+                        console.error(err);
+                        alert('Erreur lors de la suppression');
+                    });
+                }
+            };
+
+            // Load initial view
+            $scope.loadView('anneeScolaire');
+        });
+</script>
+<script src="/js/appConfig.js"></script>
+</body>
+</html>
