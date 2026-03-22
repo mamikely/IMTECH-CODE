@@ -1,0 +1,21 @@
+name: CI/CD Backend DEV
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  deploy-backend-dev:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Déployer Backend sur VPS DEV
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.VPS_IP }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 28796
+          script: |
+            cd ~/IMTECH
+            ./deploy_backend_dev.sh
