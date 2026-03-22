@@ -1,21 +1,15 @@
-iname: CI/CD Frontend DEV
+name: CI/CD Dev
 
 on:
   push:
     branches:
       - develop
-    paths:
-      - 'CODE/frontend/**'   # seulement si le frontend change
 
 jobs:
-  deploy-frontend:
+  deploy-dev:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Déployer Frontend sur VPS DEV
+      - name: Déployer sur VPS Dev
         uses: appleboy/ssh-action@v0.1.5
         with:
           host: ${{ secrets.VPS_IP }}
